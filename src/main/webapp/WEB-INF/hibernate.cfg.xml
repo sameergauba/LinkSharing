@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+                                        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+<session-factory>
+  
+ <mapping class="com.ttnd.linksharing.entities.Topic" />
+ <mapping class="com.ttnd.linksharing.entities.User" />
+ <mapping class="com.ttnd.linksharing.entities.Subscription" />
+ <mapping class="com.ttnd.linksharing.entities.DocumentResource" />
+ <mapping class="com.ttnd.linksharing.entities.LinkResource" />
+ <mapping class="com.ttnd.linksharing.entities.Resource" />
+ <mapping class="com.ttnd.linksharing.entities.ReadingItem" />
+  <mapping class="com.ttnd.linksharing.entities.ResourceRating" />
+   <mapping class="com.ttnd.linksharing.entities.pks.ResourceUserId" />
+ 
+ 
+
+</session-factory>
+</hibernate-configuration>

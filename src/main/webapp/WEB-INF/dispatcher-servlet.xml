@@ -1,0 +1,226 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context-2.5.xsd
+http://www.springframework.org/schema/aop 
+http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+http://www.springframework.org/schema/mvc 
+http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd">
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql://localhost:3306/link_db"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="igdefault"></property>
+	</bean>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+
+		<!-- <property name="packagesToScan"> <list> <value> com.ttnd.linksharing.entities 
+			</value> </list> </property> -->
+
+		<property name="packagesToScan" value="com.ttnd.linksharing.entities" />
+
+		<!-- <property name="configLocation"> <value>WEB-INF/views/hibernate.cfg.xml</value> 
+			</property> -->
+
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.show_sql">false</prop>
+
+			</props>
+		</property>
+	</bean>
+
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+
+	<bean id="baseTransactionProxy"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		abstract="true">
+		<property name="optimize" value="true" />
+		<property name="proxyTargetClass" value="true" />
+		<property name="transactionManager" ref="transactionManager" />
+		<property name="transactionAttributes">
+			<props>
+				<prop key="save*">PROPAGATION_REQUIRES_NEW,-Exception</prop>
+				<prop key="update*">PROPAGATION_REQUIRES_NEW,-Exception</prop>
+				<prop key="delete*">PROPAGATION_REQUIRES_NEW,-Exception</prop>
+				<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>
+				<prop key="lookup*">PROPAGATION_REQUIRED,readOnly</prop>
+				<prop key="view*">PROPAGATION_REQUIRED,readOnly</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- <bean class="com.sam.listeners.AllocationEventHandler" /> <bean id="student" 
+		class="com.sam.beans.Student" scope="prototype"></bean> <bean id="course" 
+		class="com.sam.beans.Course" scope="prototype"></bean> -->
+
+
+
+
+	<!-- Mail Validation of profile beans -->
+
+
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.gmail.com" />
+		<property name="port" value="587" />
+		<property name="username" value="link.sharing.java@gmail.com" />
+		<property name="password" value="linksharingjava" />
+
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+			</props>
+		</property>
+	</bean>
+
+
+	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
+
+		<property name="from" value="Linkers@linking.com" />
+
+	</bean>
+
+	<!-- <bean id="sessionUtill" class="com.ttnd.linksharing.utils.SessionUtill"> 
+		<property name="sessionFactory"> <ref bean="sessionFactory" /> </property> 
+		</bean> -->
+
+	<!-- <bean id="client" class="com.ttnd.linksharing.tempClients.Client" > 
+		<property name="sessionFactory"> <ref bean="sessionFactory" /> </property> 
+		</bean> -->
+
+	<!-- User related! -->
+	<bean id="userDao" class="com.ttnd.linksharing.dao.impl.UserDaoImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="userService" parent="baseTransactionProxy">
+		<property name="target">
+			<bean class="com.ttnd.linksharing.services.impl.UserServiceImpl">
+				<property name="userDao">
+					<ref bean="userDao" />
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- resource -->
+	<bean id="resourceDao" class="com.ttnd.linksharing.dao.impl.ResourceDaoImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="resourceService" parent="baseTransactionProxy">
+		<property name="target">
+			<bean class="com.ttnd.linksharing.services.impl.ResourceServiceImpl">
+				<property name="resourceDao">
+					<ref bean="resourceDao" />
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- subscription -->
+
+	<bean id="subscriptionDao" class="com.ttnd.linksharing.dao.impl.SubscriptionDaoImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="subscriptionService" parent="baseTransactionProxy">
+		<property name="target">
+			<bean class="com.ttnd.linksharing.services.impl.SubscriptionServiceImpl">
+				<property name="subscriptionDao">
+					<ref bean="subscriptionDao" />
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- Topic related -->
+
+	<bean id="topicDao" class="com.ttnd.linksharing.dao.impl.TopicDaoImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="topicService" parent="baseTransactionProxy">
+		<property name="target">
+			<bean class="com.ttnd.linksharing.services.impl.TopicServiceImpl">
+				<property name="topicDao">
+					<ref bean="topicDao" />
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	</bean>
+
+
+
+	<bean id="validator"
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+
+	<!-- Mvc resources -->
+	<mvc:resources mapping="/theme1/**" location="/theme1/" />
+
+	<mvc:annotation-driven />
+	<!-- <mvc:view-controller path="/" view-name="index" /> -->
+
+	<aop:aspectj-autoproxy />
+
+	<!-- AUTHENTICATION Intercepor -->
+
+	<!-- <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" 
+		/> <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"> 
+		<property name="interceptors"> <ref bean="authenticationInterceptor" /> </property> 
+		</bean> -->
+
+	<mvc:interceptors>
+	<mvc:interceptor>
+	<mvc:mapping path="/user/**"/>
+	<mvc:mapping path="/resource/**"/>
+	<mvc:mapping path="/subscription/**"/>
+	<mvc:mapping path="/topic/**"/>
+	<mvc:exclude-mapping path="/"/>
+	<mvc:exclude-mapping path="/welcome"/>
+	<mvc:exclude-mapping path="/user/login"/>
+	<mvc:exclude-mapping path="/user/register"/>
+	<mvc:exclude-mapping path="/user/pass"/>
+	<mvc:exclude-mapping path="/user/reset/**"/>
+	<mvc:exclude-mapping path="/user/passreset"/>
+	<mvc:exclude-mapping path="/user/validate/**"/>
+	<mvc:exclude-mapping path="/resource/download/document/**"/>
+		<bean class="com.ttnd.linksharing.utils.AuthenticationInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<!-- <bean id="securityInterceptor" class="com.sam."/> -->
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<context:component-scan
+		base-package="com.ttnd.linksharing.controllers,com.ttnd.linksharing.events,com.ttnd.linksharing.events.listeners,com.ttnd.linksharing.events.publishers"></context:component-scan>
+</beans>
